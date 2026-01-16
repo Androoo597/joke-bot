@@ -6,7 +6,7 @@ import { reactions } from "./modules/reactions";
 import { msgEdit } from "./modules/msgEdit";
 import { initErrorObserver } from "./modules/error";
 import { menuBot } from "./modules/menu";
-import { insert, query } from "./db/methods";
+import { delById, insert, getAll, getByKey, tryDbMethod } from "./db/methods";
 
 const bot = new Bot(`${process.env.TG_TOKEN}`);
 
@@ -21,15 +21,13 @@ msgEdit(bot);
 menuBot(bot);
 initErrorObserver(bot);
 
-// Execute the prepared statement with bound values.
+// delById.run(1);
+// delById.run(2);
 // insert.run(1, "hello");
 // insert.run(2, "world");
-// Create a prepared statement to read data from the database.
-// Execute the prepared statement and log the result set.
-console.log(query.all());
-// Prints: [ { key: 1, value: 'hello' }, { key: 2, value: 'world' } ]
+console.log(tryDbMethod("questions", getAll)?.all());
+console.log(tryDbMethod("questions", getByKey)?.all(1));
 
-// Запустите бота.
 bot.start({
   allowed_updates: [
     "message",
