@@ -1,0 +1,31 @@
+{
+  "name": "jockie-bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/main.js",
+  "scripts": {
+    "dev": "nodemon --exec tsx src/bot.ts",
+    "build": "tsc",
+    "start:prod": "node dist/bot.js"
+  },
+  "engines": {
+    "node": ">=22.2.0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@grammyjs/emoji": "^1.2.0",
+    "@grammyjs/hydrate": "^1.6.0",
+    "axios": "^1.11.0",
+    "dotenv": "^17.2.3",
+    "grammy": "^1.39.2",
+    "nodemon": "^3.1.10",
+    "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.3",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2"
+  }
+}
