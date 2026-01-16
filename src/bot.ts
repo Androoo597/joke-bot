@@ -1,11 +1,12 @@
 import "dotenv/config";
-import { Bot, InlineKeyboard } from "grammy";
+import { Bot } from "grammy";
 import { keyboardMsg } from "./modules/keyboard";
 import { parserReg } from "./modules/parserReg";
 import { reactions } from "./modules/reactions";
 import { msgEdit } from "./modules/msgEdit";
 import { initErrorObserver } from "./modules/error";
 import { menuBot } from "./modules/menu";
+import { insert, query } from "./db/methods";
 
 const bot = new Bot(`${process.env.TG_TOKEN}`);
 
@@ -19,6 +20,14 @@ reactions(bot);
 msgEdit(bot);
 menuBot(bot);
 initErrorObserver(bot);
+
+// Execute the prepared statement with bound values.
+insert.run(1, "hello");
+insert.run(2, "world");
+// Create a prepared statement to read data from the database.
+// Execute the prepared statement and log the result set.
+console.log(query.all());
+// Prints: [ { key: 1, value: 'hello' }, { key: 2, value: 'world' } ]
 
 // Запустите бота.
 bot.start({
