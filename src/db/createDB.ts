@@ -1,5 +1,5 @@
 import { DatabaseSync } from "node:sqlite";
-const database = new DatabaseSync(":memory:");
+const database = new DatabaseSync("db");
 
 // Execute SQL statements from strings.
 database.exec(`

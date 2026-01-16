@@ -22,8 +22,8 @@ menuBot(bot);
 initErrorObserver(bot);
 
 // Execute the prepared statement with bound values.
-insert.run(1, "hello");
-insert.run(2, "world");
+// insert.run(1, "hello");
+// insert.run(2, "world");
 // Create a prepared statement to read data from the database.
 // Execute the prepared statement and log the result set.
 console.log(query.all());
