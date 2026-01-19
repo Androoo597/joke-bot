@@ -1,25 +1,30 @@
-import { StatementSync } from "node:sqlite";
+import { SQLInputValue } from "node:sqlite";
 import { database } from "./createDB";
+import { Tables } from "../utils/constants";
 
-const insert = (tableName: string) =>
-  database.prepare(`INSERT INTO ${tableName} (key, value) VALUES (?, ?)")`);
-const getAll = (tableName: string) =>
-  database.prepare(`SELECT * FROM ${tableName} ORDER BY key`);
-const getByKey = (tableName: string) =>
-  database.prepare(`SELECT * FROM ${tableName} WHERE key=?`);
-const delById = (tableName: string) =>
-  database.prepare(`DELETE FROM ${tableName} WHERE key=?`);
+const sqlMethods = {
+  getAll: "SELECT * FROM tableName ORDER BY id",
+  getAllWords: "SELECT word FROM tableName ORDER BY id",
+  insert: "INSERT or IGNORE INTO tableName (userName, word) VALUES (?, ?)",
+  insertWord: "INSERT or IGNORE INTO tableName (word) VALUES (?)",
+  getById: "SELECT * FROM tableName WHERE id=?",
+  delById: "DELETE FROM tableName WHERE id=?",
+  delByWord: "DELETE FROM tableName WHERE word=?",
+};
 
-const tryDbMethod = (
-  dbName: string,
-  method: (tableName: string) => StatementSync
+const trySqlRequest = (
+  tableName: keyof typeof Tables,
+  sqlReq: keyof typeof sqlMethods,
+  method: "all" | "get" | "run" | "columns" | "iterate",
+  data?: SQLInputValue[]
 ) => {
   try {
-    const state = method(dbName);
-    return state;
+    const sql = sqlMethods[sqlReq].replace("tableName", tableName);
+    const statement = database.prepare(sql);
+    return statement[method](...(data || []));
   } catch (error) {
     console.log(error);
   }
 };
 
-export { insert, getAll, delById, getByKey, tryDbMethod };
+export { trySqlRequest };

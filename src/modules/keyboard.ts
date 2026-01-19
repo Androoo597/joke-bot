@@ -1,10 +1,10 @@
 import { Api, Bot, Context, InlineKeyboard, RawApi } from "grammy";
 
 const inlineKeyboard = new InlineKeyboard()
-  .text("Вплывашка", "tooltip")
-  .text("Alert", "alert")
-  .text("Общий", "stay")
-  .text("Общий", "next");
+  .text("Добавить слово", "tooltip")
+  .text("Показать слова", "alert")
+  .text("Таблица", "stay")
+  .text("Моя статистика", "next");
 
 export const keyboardMsg = (bot: Bot<Context, Api<RawApi>>) => {
   bot.command("keybord", async (ctx) => {
