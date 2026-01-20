@@ -25,6 +25,7 @@ const myReg = {
   badWords: /ты\s([а-яА-Я\w]+)/im,
   censorWords: (words: string[]) => new RegExp(`(${words.join("|")})`, "im"),
   addWord: /\s*[,|]\s*/g,
+  updWord: (word: string) => new RegExp(`[|]?${word}[|]?`, "im"),
 };
 
 export { myReg };

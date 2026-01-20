@@ -9,7 +9,9 @@ const sqlMethods = {
   insertWord: "INSERT or IGNORE INTO tableName (word) VALUES (?)",
   getById: "SELECT * FROM tableName WHERE id=?",
   delById: "DELETE FROM tableName WHERE id=?",
-  delByWord: "DELETE FROM tableName WHERE word=?",
+  delByWord: "DELETE FROM tableName WHERE word LIKE ?",
+  selectByWord: "SELECT word FROM tableName WHERE word LIKE ?",
+  updateWord: "UPDATE tableName SET word=? WHERE word LIKE ?",
 };
 
 const trySqlRequest = (

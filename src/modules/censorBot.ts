@@ -12,7 +12,7 @@ const inlineKeyboard = new InlineKeyboard()
 
 let inputMode = "";
 
-const getWords = () => {
+const getAllWords = () => {
   const allWords = trySqlRequest("words", "getAllWords", "all");
   if (Array.isArray(allWords)) {
     const stringWords = allWords
@@ -21,6 +21,24 @@ const getWords = () => {
     return stringWords;
   }
   return [];
+};
+
+const updateWord = (word: string, message: string) => {
+  const wwm = word.replace(myReg.updWord(message), "");
+  console.log("wwm ==> ", wwm);
+  const ecec = trySqlRequest("words", "updateWord", "run", [
+    wwm,
+    `%${message}%`,
+  ]);
+  console.log("ecec ==> ", ecec);
+};
+
+const deleteWord = (message: string) => {
+  trySqlRequest("words", "delByWord", "run", [`%${message}%`]);
+};
+
+const getWord = (message: string): string => {
+  return trySqlRequest("words", "selectByWord", "get", [`%${message}%`]).word;
 };
 
 export const censorBot = (bot: Bot<Context, Api<RawApi>>) => {
@@ -39,15 +57,25 @@ export const censorBot = (bot: Bot<Context, Api<RawApi>>) => {
     await bot.api.sendMessage(ctx.chatId, "Помощь");
     await bot.api.sendMessage(
       ctx.chatId,
-      'Используйте кнопку: "Добавить слово", чтобы добавить слова для отслеживания\n\nВы можете добавить как одно слово, так и несколько через запятую\n\nИспользуйте кнопку: "Удалить слово", чтобы удалить слова для отслеживания\n\nВы можете удалить как одно слово, так и несколько через запятую',
+      'кн. "Добавить слово", позволяет добавить как одно слово, так и несколько через запятую\n\nкн. "Удалить слово", позволяет удалить как одно слово, так и несколько слов через запятую',
       { parse_mode: "HTML" }
     );
   });
 
   bot.command("menu", async (ctx) => {
-    await ctx.reply("Держи клаву", {
+    await ctx.reply("Меню цензор бота", {
       reply_markup: inlineKeyboard,
     });
+  });
+
+  bot.command("resetAll", async (ctx) => {
+    await ctx.reply(
+      "Удаляет все данные статистики и все слова (но еще не готова)"
+    );
+  });
+
+  bot.command("resetWords", async (ctx) => {
+    await ctx.reply("Удаляет все слова из списка (но еще не готова)");
   });
 
   bot.callbackQuery("addWord", async (ctx) => {
@@ -79,17 +107,21 @@ export const censorBot = (bot: Bot<Context, Api<RawApi>>) => {
           message.replace(myReg.addWord, "|"),
         ]);
         inputMode = "";
-        // console.log(trySqlRequest("words", "getAllWords", "all"));
         ctx.reply(`Слово: "${ctx.update.message.text}" успешно добавлено`);
         break;
       case "del":
-        trySqlRequest("words", "delByWord", "run", [message]);
+        const word = getWord(message);
+
+        message.length !== word.length
+          ? updateWord(word, message)
+          : deleteWord(message);
+
         inputMode = "";
         ctx.reply(`Слово: "${ctx.update.message.text}" успешно удалено`);
         break;
       default:
-        const ererve = getWords();
-        const res = message.match(myReg.censorWords(ererve));
+        const regWords = getAllWords();
+        const res = message.match(myReg.censorWords(regWords));
 
         if (res) {
           ctx.reply(`Ваше выражение: "${res?.[0]}" дабавлено в статистику!`);
@@ -103,7 +135,7 @@ export const censorBot = (bot: Bot<Context, Api<RawApi>>) => {
   });
 
   bot.callbackQuery("alertWords", async (ctx) => {
-    const allWords = getWords();
+    const allWords = getAllWords();
     await ctx.reply(
       allWords.length ? allWords.join("\n") : "Нет добавленных слов"
     );
