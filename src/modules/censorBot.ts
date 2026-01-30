@@ -1,14 +1,6 @@
 import { Api, Bot, Context, InlineKeyboard, RawApi } from "grammy";
-import { myReg, phrases, prizeSmiles } from "../utils/constants";
+import { menuKeyboard, myReg, phrases, prizeSmiles } from "../utils/constants";
 import { trySqlRequest } from "../db/methods";
-
-const inlineKeyboard = new InlineKeyboard()
-  .text("Добавить слово", "addWord")
-  .text("Удалить слово", "delWord")
-  .text("Показать слова", "alertWords")
-  .row()
-  .text("Таблица", "result")
-  .text("Моя статистика", "ownStatistic");
 
 let inputMode = "";
 
@@ -18,7 +10,6 @@ const getAllWords = () => {
     sqlReq: "getAllWords",
     method: "all",
   }) as Record<"word", string>[];
-  // console.log("allWords ==> ", allWords);
   if (Array.isArray(allWords)) {
     const stringWords = allWords
       ?.map((item) => item.word?.split(myReg.addWord))
@@ -28,34 +19,13 @@ const getAllWords = () => {
   return [];
 };
 
-// const updateWord = (word: string, message: string) => {
-//   const wwm = word.replace(myReg.updWord(message), "");
-//   console.log("wwm ==> ", wwm);
-//   const ecec = trySqlRequest("words", "updateWord", "run", [
-//     wwm,
-//     `%${message}%`,
-//   ]);
-//   console.log("ecec ==> ", ecec);
-// };
-
-// const deleteWord = (message: string) => {
-//   trySqlRequest("words", "delByWord", "run", [`%${message}%`]);
-// };
-
-// const getWord = (message: string): string => {
-//   const word = trySqlRequest("words", "selectByWord", "get", [
-//     `%${message}%`,
-//   ]) as Record<"word", string>;
-//   return word.word;
-// };
-
 export const censorBot = (bot: Bot<Context, Api<RawApi>>) => {
   bot.command("start", async (ctx) => {
     await bot.api.sendMessage(ctx.chatId, phrases.hello, {
       parse_mode: "HTML",
     });
     await ctx.reply("Главное меню комманд", {
-      reply_markup: inlineKeyboard,
+      reply_markup: menuKeyboard,
     });
   });
 
@@ -66,7 +36,7 @@ export const censorBot = (bot: Bot<Context, Api<RawApi>>) => {
 
   bot.command("menu", async (ctx) => {
     await ctx.reply("Меню цензор бота /help - если нужна помошь", {
-      reply_markup: inlineKeyboard,
+      reply_markup: menuKeyboard,
     });
   });
 
@@ -104,7 +74,6 @@ export const censorBot = (bot: Bot<Context, Api<RawApi>>) => {
       sqlReq: "getTableResult",
       method: "all",
     }) as Record<"userName" | "result", string>[];
-    // console.log("data ==> ", data);
 
     data.forEach((item, index) => {
       tableResult
@@ -167,22 +136,13 @@ export const censorBot = (bot: Bot<Context, Api<RawApi>>) => {
         break;
 
       case "del":
-        // const word = getWord(message);
         const wordsToDel = message.split(myReg.splitter);
-        // console.log("wordsToDel ==> ", wordsToDel);
         trySqlRequest({
           tableName: "words",
           sqlReq: "delwords",
           method: "run",
           data: wordsToDel,
         });
-
-        // deleteWord(message);
-        // trySqlRequest("words", "delByWord", "run", [`%${message}%`]);
-
-        // message.length !== word.length
-        //   ? updateWord(word, message)
-        //   : deleteWord(message);
 
         ctx.reply(`Слово: "${ctx.update.message.text}" успешно удалено`);
         break;
@@ -225,12 +185,8 @@ export const censorBot = (bot: Bot<Context, Api<RawApi>>) => {
 
       default:
         const regWords = getAllWords();
-        // console.log("regWords ==> ", regWords);
         const searchRes = (message + " ").match(myReg.censorWords(regWords));
         const res = searchRes?.map((item) => item.slice(0, -1).trim());
-        // console.log("res ==> ", res);
-        // console.log("myReg.censorWords ==> ", myReg.censorWords(regWords));
-        // console.log("message ==> ", message);
 
         if (res?.length) {
           ctx.reply(`Ваши слова: "${res.toString()}" дабавлены в статистику!`);

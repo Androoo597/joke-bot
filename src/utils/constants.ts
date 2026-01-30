@@ -1,3 +1,5 @@
+import { InlineKeyboard } from "grammy";
+
 export enum Tables {
   "data" = "data",
   "words" = "words",
@@ -18,6 +20,14 @@ const myReg = {
   splitter: /,\s|[|]\s/,
   matcherAsk: /(\([?,\s]+\))/,
 };
+
+const menuKeyboard = new InlineKeyboard()
+  .text("Добавить слово", "addWord")
+  .text("Удалить слово", "delWord")
+  .text("Показать слова", "alertWords")
+  .row()
+  .text("Таблица", "result")
+  .text("Моя статистика", "ownStatistic");
 
 const phrases = {
   hello: `Добрый день! Вас приветсвует Цензор бот. Вы можете добавлять слова для подсчета статистики использования нецензурных слов из сообщений в чате.
@@ -47,4 +57,4 @@ const phrases = {
       `,
 };
 
-export { myReg, prizeSmiles, phrases };
+export { myReg, prizeSmiles, phrases, menuKeyboard };

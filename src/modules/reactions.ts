@@ -7,10 +7,6 @@ export const reactions = (bot: Bot<Context, Api<RawApi>>) => {
     });
   });
 
-  // bot.reaction("🙏", (ctx) => {
-  //   ctx.update.message_reaction.old_reaction;
-  // });
-
   bot.on("message_reaction", async (ctx) => {
     const { emojiRemoved } = ctx.reactions();
     if (emojiRemoved.includes("💩")) {
