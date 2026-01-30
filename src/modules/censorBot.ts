@@ -13,10 +13,12 @@ const inlineKeyboard = new InlineKeyboard()
 let inputMode = "";
 
 const getAllWords = () => {
-  const allWords = trySqlRequest("words", "getAllWords", "all") as Record<
-    "word",
-    string
-  >[];
+  const allWords = trySqlRequest({
+    tableName: "words",
+    sqlReq: "getAllWords",
+    method: "all",
+  }) as Record<"word", string>[];
+  // console.log("allWords ==> ", allWords);
   if (Array.isArray(allWords)) {
     const stringWords = allWords
       ?.map((item) => item.word?.split(myReg.addWord))
@@ -26,26 +28,26 @@ const getAllWords = () => {
   return [];
 };
 
-const updateWord = (word: string, message: string) => {
-  const wwm = word.replace(myReg.updWord(message), "");
-  console.log("wwm ==> ", wwm);
-  const ecec = trySqlRequest("words", "updateWord", "run", [
-    wwm,
-    `%${message}%`,
-  ]);
-  console.log("ecec ==> ", ecec);
-};
+// const updateWord = (word: string, message: string) => {
+//   const wwm = word.replace(myReg.updWord(message), "");
+//   console.log("wwm ==> ", wwm);
+//   const ecec = trySqlRequest("words", "updateWord", "run", [
+//     wwm,
+//     `%${message}%`,
+//   ]);
+//   console.log("ecec ==> ", ecec);
+// };
 
-const deleteWord = (message: string) => {
-  trySqlRequest("words", "delByWord", "run", [`%${message}%`]);
-};
+// const deleteWord = (message: string) => {
+//   trySqlRequest("words", "delByWord", "run", [`%${message}%`]);
+// };
 
-const getWord = (message: string): string => {
-  const word = trySqlRequest("words", "selectByWord", "get", [
-    `%${message}%`,
-  ]) as Record<"word", string>;
-  return word.word;
-};
+// const getWord = (message: string): string => {
+//   const word = trySqlRequest("words", "selectByWord", "get", [
+//     `%${message}%`,
+//   ]) as Record<"word", string>;
+//   return word.word;
+// };
 
 export const censorBot = (bot: Bot<Context, Api<RawApi>>) => {
   bot.command("start", async (ctx) => {
@@ -97,19 +99,21 @@ export const censorBot = (bot: Bot<Context, Api<RawApi>>) => {
     const tableResult = new InlineKeyboard();
     tableResult.text("Место").text("Имя").text("Кол. слов").row();
 
-    const data = trySqlRequest("data", "getTableResult", "all") as Record<
-      "userName" | "result",
-      string
-    >[];
+    const data = trySqlRequest({
+      tableName: "data",
+      sqlReq: "getTableResult",
+      method: "all",
+    }) as Record<"userName" | "result", string>[];
+    // console.log("data ==> ", data);
 
     data.forEach((item, index) => {
       tableResult
         .text(
           `${index + 1} место ${
             index <= 2 ? prizeSmiles[index] : prizeSmiles[3]
-          }`
+          }`,
         )
-        .text(item.userName)
+        .text(item.userName ?? "Другие")
         .text(item.result)
         .row();
     });
@@ -123,15 +127,22 @@ export const censorBot = (bot: Bot<Context, Api<RawApi>>) => {
     const tableResult = new InlineKeyboard();
     tableResult.text("Имя").text("Слово").text("Кол-во").row();
 
-    const data = trySqlRequest("data", "getOwnResult", "all", [
-      ctx.from.username || "",
-    ]) as Record<"userName" | "word" | "count", string>[];
+    const data = trySqlRequest({
+      tableName: "data",
+      sqlReq: "getOwnResult",
+      method: "all",
+      data: [ctx.from.username || ""],
+    }) as Record<"userName" | "word" | "count", string>[];
 
     let counter = 0;
 
     data.forEach((item) => {
       counter = +item.count + counter;
-      tableResult.text(item.userName).text(item.word).text(item.count).row();
+      tableResult
+        .text(item.userName || "ошибка")
+        .text(item.word || "слово удалено")
+        .text(item.count)
+        .row();
     });
 
     tableResult.text("Итог").text("Итог").text(String(counter));
@@ -146,25 +157,43 @@ export const censorBot = (bot: Bot<Context, Api<RawApi>>) => {
 
     switch (inputMode) {
       case "add":
-        trySqlRequest("words", "insertWord", "run", [
-          message.replace(myReg.addWord, "|"),
-        ]);
-        ctx.reply(`Слово: "${ctx.update.message.text}" успешно добавлено`);
+        trySqlRequest({
+          tableName: "words",
+          sqlReq: "insertWord",
+          method: "run",
+          data: message.split(myReg.splitter),
+        });
+        ctx.reply(`Слова: "${ctx.update.message.text}" успешно добавлены`);
         break;
 
       case "del":
-        const word = getWord(message);
+        // const word = getWord(message);
+        const wordsToDel = message.split(myReg.splitter);
+        // console.log("wordsToDel ==> ", wordsToDel);
+        trySqlRequest({
+          tableName: "words",
+          sqlReq: "delwords",
+          method: "run",
+          data: wordsToDel,
+        });
 
-        message.length !== word.length
-          ? updateWord(word, message)
-          : deleteWord(message);
+        // deleteWord(message);
+        // trySqlRequest("words", "delByWord", "run", [`%${message}%`]);
+
+        // message.length !== word.length
+        //   ? updateWord(word, message)
+        //   : deleteWord(message);
 
         ctx.reply(`Слово: "${ctx.update.message.text}" успешно удалено`);
         break;
 
       case "delWors":
-        if (/Y|YES/im.test(message)) {
-          trySqlRequest("words", "delAll", "run");
+        if (myReg.yesNo.test(message)) {
+          trySqlRequest({
+            tableName: "words",
+            sqlReq: "delAll",
+            method: "run",
+          });
           await ctx.reply("Все ключевые слова были удалены");
         } else {
           await ctx.reply("Отмена");
@@ -172,8 +201,8 @@ export const censorBot = (bot: Bot<Context, Api<RawApi>>) => {
         break;
 
       case "delStat":
-        if (/Y|YES/im.test(message)) {
-          trySqlRequest("data", "delAll", "run");
+        if (myReg.yesNo.test(message)) {
+          trySqlRequest({ tableName: "data", sqlReq: "delAll", method: "run" });
           await ctx.reply("Статистика была отчищена");
         } else {
           await ctx.reply("Отмена");
@@ -181,9 +210,13 @@ export const censorBot = (bot: Bot<Context, Api<RawApi>>) => {
         break;
 
       case "delAll":
-        if (/Y|YES/im.test(message)) {
-          trySqlRequest("data", "delAll", "run");
-          trySqlRequest("words", "delAll", "run");
+        if (myReg.yesNo.test(message)) {
+          trySqlRequest({ tableName: "data", sqlReq: "delAll", method: "run" });
+          trySqlRequest({
+            tableName: "words",
+            sqlReq: "delAll",
+            method: "run",
+          });
           await ctx.reply("Ваш Цензор бот был сброшен до заводских настроек");
         } else {
           await ctx.reply("Отмена");
@@ -192,15 +225,23 @@ export const censorBot = (bot: Bot<Context, Api<RawApi>>) => {
 
       default:
         const regWords = getAllWords();
-        const res = message.match(myReg.censorWords(regWords));
+        // console.log("regWords ==> ", regWords);
+        const searchRes = (message + " ").match(myReg.censorWords(regWords));
+        const res = searchRes?.map((item) => item.slice(0, -1).trim());
+        // console.log("res ==> ", res);
+        // console.log("myReg.censorWords ==> ", myReg.censorWords(regWords));
+        // console.log("message ==> ", message);
 
-        if (res) {
-          ctx.reply(`Ваше выражение: "${res?.[0]}" дабавлено в статистику!`);
-          trySqlRequest("data", "insert", "run", [
-            ctx.from?.username || "",
-            res?.[0],
-          ]);
+        if (res?.length) {
+          ctx.reply(`Ваши слова: "${res.toString()}" дабавлены в статистику!`);
+          trySqlRequest({
+            tableName: "data",
+            sqlReq: "insert",
+            method: "run",
+            data: res.map((word) => [ctx.from?.username || "", word]).flat(1),
+          });
         }
+
         break;
     }
     inputMode = "";
@@ -209,7 +250,7 @@ export const censorBot = (bot: Bot<Context, Api<RawApi>>) => {
   bot.callbackQuery("alertWords", async (ctx) => {
     const allWords = getAllWords();
     await ctx.reply(
-      allWords.length ? allWords.join("\n") : "Нет добавленных слов"
+      allWords.length ? allWords.join("\n") : "Нет добавленных слов",
     );
   });
 };

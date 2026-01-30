@@ -3,29 +3,20 @@ export enum Tables {
   "words" = "words",
 }
 
-// const words = [
-//   "хуй",
-//   "волына",
-//   "ствол",
-//   "пенис",
-//   "чл[еэ]н",
-//   "пистолет кож[ае]нный",
-//   "кож[ае]нный пистолет",
-//   "хрен",
-//   "хер",
-//   "агрегат",
-//   "дрын",
-//   "фаллос",
-//   "елда[к]?",
-// ];
-
 const prizeSmiles = ["🥇", "🥈", "🥉", "🍻"];
 
 const myReg = {
   badWords: /ты\s([а-яА-Я\w]+)/im,
-  censorWords: (words: string[]) => new RegExp(`(${words.join("|")})`, "im"),
+  censorWords: (words: string[]) => {
+    const aroundWords = words.map((word) => `[\\s]?(${word})[^а-яa-z]`);
+    return new RegExp(aroundWords.join("|"), "gim");
+  },
   addWord: /\s*[,|]\s*/g,
-  updWord: (word: string) => new RegExp(`[|,]?${word}[|,]?`, "im"),
+  // updWord: (word: string) =>
+  //   new RegExp(String.raw`[|,\s]?${word}[|,\s]?`, "im"),
+  yesNo: /Y|YES/im,
+  splitter: /,\s|[|]\s/,
+  matcherAsk: /(\([?,\s]+\))/,
 };
 
 const phrases = {

@@ -1,6 +1,6 @@
 import { SQLInputValue } from "node:sqlite";
 import { database } from "./createDB";
-import { Tables } from "../utils/constants";
+import { myReg, Tables } from "../utils/constants";
 
 const sqlMethods = {
   getAll: "SELECT * FROM tableName ORDER BY id",
@@ -11,26 +11,53 @@ const sqlMethods = {
   getAllWords: "SELECT word FROM tableName ORDER BY id",
   insert: "INSERT or IGNORE INTO tableName (userName, word) VALUES (?, ?)",
   insertWord: "INSERT or IGNORE INTO tableName (word) VALUES (?)",
-  getById: "SELECT * FROM tableName WHERE id=?",
   delAll: "DELETE FROM tableName",
-  delById: "DELETE FROM tableName WHERE id=?",
-  delByWord: "DELETE FROM tableName WHERE word LIKE ?",
-  selectByWord: "SELECT word FROM tableName WHERE word LIKE ?",
-  updateWord: "UPDATE tableName SET word=? WHERE word LIKE ?",
+  delwords: "DELETE FROM tableName WHERE word IN (?)",
+  // getById: "SELECT * FROM tableName WHERE id=?",
+  // delById: "DELETE FROM tableName WHERE id=?",
+  // delByWord: "DELETE FROM tableName WHERE word LIKE ?",
+  // selectByWord: "SELECT word FROM tableName WHERE word LIKE ?",
+  // updateWord: "UPDATE tableName SET word=? WHERE word LIKE ?",
 };
 
-const trySqlRequest = (
-  tableName: keyof typeof Tables,
-  sqlReq: keyof typeof sqlMethods,
-  method: "all" | "get" | "run" | "columns" | "iterate",
-  data?: SQLInputValue[]
-) => {
+let sql;
+
+interface TrySQLReq {
+  tableName: keyof typeof Tables;
+  sqlReq: keyof typeof sqlMethods;
+  method: "all" | "get" | "run" | "columns" | "iterate";
+  data?: SQLInputValue[];
+  onError?: () => void;
+}
+
+const trySqlRequest = ({
+  tableName,
+  sqlReq,
+  method,
+  data,
+  onError,
+}: TrySQLReq) => {
   try {
-    const sql = sqlMethods[sqlReq].replace("tableName", tableName);
+    sql = sqlMethods[sqlReq].replace("tableName", tableName);
+    const divider = sqlReq === "insert" ? 2 : 1;
+    if (sqlReq.startsWith("insert")) {
+      const replacedText = sql.match(myReg.matcherAsk);
+      const newText = (replacedText?.[1] + ",")?.repeat(
+        (data?.length || 1) / divider,
+      );
+      sql = sql.replace(replacedText?.[1] || "", newText.slice(0, -1));
+      // console.log("data ==> ", data);
+      // console.log("sql ==> ", sql);
+    }
+    if (sqlReq === "delwords") {
+      const newText = `(${"?,".repeat(data?.length || 0).slice(0, -1)})`;
+      sql = sql.replace("(?)", newText);
+    }
     const statement = database.prepare(sql);
     return statement[method](...(data || []));
   } catch (error) {
     console.log(error);
+    onError?.();
   }
 };
 

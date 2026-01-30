@@ -25,8 +25,6 @@ initErrorObserver(bot);
 
 // trySqlRequest("data", "insert", "run", ["value1", "value2"]);
 // trySqlRequest("data", "delById", "run", [1]);
-console.log(trySqlRequest("data", "getAll", "all"));
-console.log(trySqlRequest("words", "getAllWords", "all"));
 
 bot.start({
   allowed_updates: [
