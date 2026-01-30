@@ -14,12 +14,14 @@ const myReg = {
     return new RegExp(aroundWords.join("|"), "gim");
   },
   addWord: /\s*[,|]\s*/g,
-  // updWord: (word: string) =>
-  //   new RegExp(String.raw`[|,\s]?${word}[|,\s]?`, "im"),
   yesNo: /Y|YES/im,
   splitter: /,\s|[|]\s/,
   matcherAsk: /(\([?,\s]+\))/,
 };
+
+const userMenuKeyboard = new InlineKeyboard()
+  .text("Таблица", "result")
+  .text("Моя статистика", "ownStatistic");
 
 const menuKeyboard = new InlineKeyboard()
   .text("Добавить слово", "addWord")
@@ -57,4 +59,4 @@ const phrases = {
       `,
 };
 
-export { myReg, prizeSmiles, phrases, menuKeyboard };
+export { myReg, prizeSmiles, phrases, menuKeyboard, userMenuKeyboard };

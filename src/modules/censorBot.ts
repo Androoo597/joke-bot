@@ -1,23 +1,33 @@
 import { Api, Bot, Context, InlineKeyboard, RawApi } from "grammy";
 import { menuKeyboard, myReg, phrases, prizeSmiles } from "../utils/constants";
 import { trySqlRequest } from "../db/methods";
+import { getAllWords } from "../utils/getAllWords";
 
 let inputMode = "";
+let regWords = getAllWords();
 
-const getAllWords = () => {
-  const allWords = trySqlRequest({
-    tableName: "words",
-    sqlReq: "getAllWords",
-    method: "all",
-  }) as Record<"word", string>[];
-  if (Array.isArray(allWords)) {
-    const stringWords = allWords
-      ?.map((item) => item.word?.split(myReg.addWord))
-      .flat(1);
-    return stringWords;
-  }
-  return [];
+const targetObj = {
+  regWords: getAllWords(),
+  dymanicReg: myReg.censorWords(regWords),
 };
+
+const proxyHandler = {
+  get(target: typeof targetObj) {
+    if (target.regWords === regWords) {
+      return target.dymanicReg;
+    } else {
+      this._set(target, null, myReg.censorWords(regWords));
+      return target.dymanicReg;
+    }
+  },
+  _set(target: typeof targetObj, _: null, value: RegExp) {
+    target.regWords = regWords;
+    target.dymanicReg = value;
+    return true;
+  },
+};
+
+const proxyReg = new Proxy(targetObj, proxyHandler);
 
 export const censorBot = (bot: Bot<Context, Api<RawApi>>) => {
   bot.command("start", async (ctx) => {
@@ -132,6 +142,8 @@ export const censorBot = (bot: Bot<Context, Api<RawApi>>) => {
           method: "run",
           data: message.split(myReg.splitter),
         });
+
+        regWords = getAllWords();
         ctx.reply(`Слова: "${ctx.update.message.text}" успешно добавлены`);
         break;
 
@@ -144,6 +156,7 @@ export const censorBot = (bot: Bot<Context, Api<RawApi>>) => {
           data: wordsToDel,
         });
 
+        regWords = getAllWords();
         ctx.reply(`Слово: "${ctx.update.message.text}" успешно удалено`);
         break;
 
@@ -154,6 +167,8 @@ export const censorBot = (bot: Bot<Context, Api<RawApi>>) => {
             sqlReq: "delAll",
             method: "run",
           });
+
+          regWords = getAllWords();
           await ctx.reply("Все ключевые слова были удалены");
         } else {
           await ctx.reply("Отмена");
@@ -177,6 +192,8 @@ export const censorBot = (bot: Bot<Context, Api<RawApi>>) => {
             sqlReq: "delAll",
             method: "run",
           });
+
+          regWords = getAllWords();
           await ctx.reply("Ваш Цензор бот был сброшен до заводских настроек");
         } else {
           await ctx.reply("Отмена");
@@ -184,8 +201,7 @@ export const censorBot = (bot: Bot<Context, Api<RawApi>>) => {
         break;
 
       default:
-        const regWords = getAllWords();
-        const searchRes = (message + " ").match(myReg.censorWords(regWords));
+        const searchRes = (message + " ").match(proxyReg.dymanicReg);
         const res = searchRes?.map((item) => item.slice(0, -1).trim());
 
         if (res?.length) {

@@ -2,6 +2,14 @@ import { SQLInputValue } from "node:sqlite";
 import { database } from "./createDB";
 import { myReg, Tables } from "../utils/constants";
 
+interface TrySQLReq {
+  tableName: keyof typeof Tables;
+  sqlReq: keyof typeof sqlMethods;
+  method: "all" | "get" | "run" | "columns" | "iterate";
+  data?: SQLInputValue[];
+  onError?: () => void;
+}
+
 const sqlMethods = {
   getAll: "SELECT * FROM tableName ORDER BY id",
   getTableResult:
@@ -13,22 +21,9 @@ const sqlMethods = {
   insertWord: "INSERT or IGNORE INTO tableName (word) VALUES (?)",
   delAll: "DELETE FROM tableName",
   delwords: "DELETE FROM tableName WHERE word IN (?)",
-  // getById: "SELECT * FROM tableName WHERE id=?",
-  // delById: "DELETE FROM tableName WHERE id=?",
-  // delByWord: "DELETE FROM tableName WHERE word LIKE ?",
-  // selectByWord: "SELECT word FROM tableName WHERE word LIKE ?",
-  // updateWord: "UPDATE tableName SET word=? WHERE word LIKE ?",
 };
 
 let sql;
-
-interface TrySQLReq {
-  tableName: keyof typeof Tables;
-  sqlReq: keyof typeof sqlMethods;
-  method: "all" | "get" | "run" | "columns" | "iterate";
-  data?: SQLInputValue[];
-  onError?: () => void;
-}
 
 const trySqlRequest = ({
   tableName,
@@ -46,8 +41,6 @@ const trySqlRequest = ({
         (data?.length || 1) / divider,
       );
       sql = sql.replace(replacedText?.[1] || "", newText.slice(0, -1));
-      // console.log("data ==> ", data);
-      // console.log("sql ==> ", sql);
     }
     if (sqlReq === "delwords") {
       const newText = `(${"?,".repeat(data?.length || 0).slice(0, -1)})`;
