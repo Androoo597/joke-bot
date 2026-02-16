@@ -1,19 +1,17 @@
-import { Bot, Api, RawApi, Context } from "grammy";
 import { trySqlRequest } from "../../db/methods";
 import { myReg } from "../../utils/constants";
 import { getAllWords } from "../../utils/getAllWords";
-import { TargetObj } from "./censorBot";
+import {
+  setInputMode,
+  inputMode as getInputMode,
+  setRegWords,
+  proxyReg,
+} from "./censorBot";
+import { bot } from "../../bot";
 
-export const useMessageHandler = (
-  bot: Bot<Context, Api<RawApi>>,
-  setInputMode: (mode: string) => void,
-  getInputMode: () => string,
-  setRegWords: (words: string[]) => void,
-  proxyReg: TargetObj,
-) => {
-  bot.on("message:text", async (ctx) => {
+export const useMessageHandler = () => {
+  bot.chatType("private").on("message:text", async (ctx) => {
     const message = ctx.update.message.text;
-
     switch (getInputMode()) {
       case "add":
         trySqlRequest({
@@ -74,23 +72,26 @@ export const useMessageHandler = (
           });
 
           setRegWords(getAllWords());
-          await ctx.reply("Ваш Цензор бот был сброшен до заводских настроек");
+          await ctx.reply("Ваш DICK-BOT был сброшен до заводских настроек");
         } else {
           await ctx.reply("Отмена");
         }
         break;
 
       default:
-        const searchRes = (message + " ").match(proxyReg.value);
+        const searchRes = (message + " ").match(proxyReg.dymanicReg);
         const res = searchRes?.map((item) => item.slice(0, -1).trim());
 
         if (res?.length) {
-          ctx.reply(`Ваши слова: "${res.toString()}" дабавлены в статистику!`);
           trySqlRequest({
             tableName: "data",
             sqlReq: "insert",
             method: "run",
             data: res.map((word) => [ctx.from?.username || "", word]).flat(1),
+            onSuccess: () =>
+              ctx.reply(
+                `Ваши слова: "${res.toString()}" дабавлены в статистику!`,
+              ),
           });
         }
 
@@ -98,4 +99,27 @@ export const useMessageHandler = (
     }
     setInputMode("");
   });
+
+  bot
+    .chatType(["channel", "group", "supergroup"])
+    .on("message:text", async (ctx) => {
+      const message = ctx.update.message.text;
+      const searchRes = (message + " ").match(proxyReg.dymanicReg);
+      const res = searchRes?.map((item) => item.slice(0, -1).trim());
+
+      if (res?.length) {
+        trySqlRequest({
+          tableName: "data",
+          sqlReq: "insert",
+          method: "run",
+          data: res.map((word) => [ctx.from?.username || "", word]).flat(1),
+          onSuccess: () =>
+            ctx.reply(
+              `Ваши слова: "${res.toString()}" дабавлены в статистику!`,
+            ),
+        });
+      }
+
+      setInputMode("");
+    });
 };

@@ -8,6 +8,7 @@ interface TrySQLReq {
   method: "all" | "get" | "run" | "columns" | "iterate";
   data?: SQLInputValue[];
   onError?: () => void;
+  onSuccess?: () => void;
 }
 
 const sqlMethods = {
@@ -21,6 +22,11 @@ const sqlMethods = {
   insertWord: "INSERT or IGNORE INTO tableName (word) VALUES (?)",
   delAll: "DELETE FROM tableName",
   delwords: "DELETE FROM tableName WHERE word IN (?)",
+  getAdmins:
+    "SELECT userName, userID, status, chatID, chatTitle FROM tableName ORDER BY status",
+  delAdmin: "DELETE FROM tableName",
+  insertAdmins:
+    "INSERT or IGNORE INTO tableName (userName, userID, status, chatID, chatTitle) VALUES (?, ?, ?, ?, ?)",
 };
 
 let sql;
@@ -31,14 +37,17 @@ const trySqlRequest = ({
   method,
   data,
   onError,
+  onSuccess,
 }: TrySQLReq) => {
   try {
     sql = sqlMethods[sqlReq].replace("tableName", tableName);
-    const divider = sqlReq === "insert" ? 2 : 1;
+    const divider = sqlMethods[sqlReq]
+      .match(/\(([^)]+)\)/i)?.[1]
+      .split(", ").length;
     if (sqlReq.startsWith("insert")) {
       const replacedText = sql.match(myReg.matcherAsk);
       const newText = (replacedText?.[1] + ",")?.repeat(
-        (data?.length || 1) / divider,
+        (data?.length || 1) / (divider || 1),
       );
       sql = sql.replace(replacedText?.[1] || "", newText.slice(0, -1));
     }
@@ -47,6 +56,7 @@ const trySqlRequest = ({
       sql = sql.replace("(?)", newText);
     }
     const statement = database.prepare(sql);
+    onSuccess?.();
     return statement[method](...(data || []));
   } catch (error) {
     console.log(error);

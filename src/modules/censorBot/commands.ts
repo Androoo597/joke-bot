@@ -1,47 +1,84 @@
-import { Bot, Api, RawApi, Context } from "grammy";
-import { phrases, menuKeyboard } from "../../utils/constants";
+import {
+  phrases,
+  menuKeyboard,
+  listMyComands,
+  userMenuKeyboard,
+} from "../../utils/constants";
+import { bot } from "../../bot";
+import { admins, setInputMode } from "./censorBot";
+import { updateAdmins } from "./changeRoleAdmin";
+import { InlineKeyboard, type Context } from "grammy";
 
-export const useCensorCommands = (
-  bot: Bot<Context, Api<RawApi>>,
-  setInputMode: (mode: string) => void,
-) => {
-  bot.command("start", async (ctx) => {
-    await bot.api.sendMessage(ctx.chatId, phrases.hello, {
-      parse_mode: "HTML",
-    });
-    await ctx.reply("Главное меню комманд", {
-      reply_markup: menuKeyboard,
-    });
+const isAdmin = (userName?: string) => {
+  admins();
+  console.log("userName ==> ", userName);
+  console.log("admins() ==> ", admins());
+  return admins()
+    .flat(1)
+    .some((value) => value === userName);
+};
+
+const showStartMessages = async (ctx: Context, keyboard: InlineKeyboard) => {
+  await bot.api.sendMessage(ctx?.chatId || -1, phrases.hello, {
+    parse_mode: "HTML",
+  });
+  await ctx.reply("Главное меню комманд", {
+    reply_markup: keyboard,
+  });
+};
+
+export const useCensorCommands = () => {
+  bot.api.setMyCommands(listMyComands);
+
+  bot.chatType(["group", "channel", "supergroup"]).command("start", (ctx) => {
+    updateAdmins(ctx);
+    showStartMessages(ctx, userMenuKeyboard);
   });
 
-  bot.command("help", async (ctx) => {
+  bot.chatType("private").command("help", async (ctx) => {
     await bot.api.sendMessage(ctx.chatId, "Помощь");
     await bot.api.sendMessage(ctx.chatId, phrases.help);
   });
 
-  bot.command("menu", async (ctx) => {
-    await ctx.reply("Меню цензор бота /help - если нужна помошь", {
-      reply_markup: menuKeyboard,
-    });
-  });
-
-  bot.command("resetAll", async (ctx) => {
+  bot.chatType("private").command("reset_all", async (ctx) => {
+    if (!isAdmin(ctx.from?.username)) {
+      await ctx.reply("Это действие доступно только админу чата");
+      return;
+    }
     await ctx.reply("Введите Y/Yes для отчистки данных бота");
     setInputMode("delAll");
   });
 
-  bot.command("resetWords", async (ctx) => {
+  bot.chatType("private").command("reset_words", async (ctx) => {
+    if (!isAdmin(ctx.from?.username)) {
+      await ctx.reply("Это действие доступно только админу чата");
+      return;
+    }
     await ctx.reply("Введите Y/Yes для удаления всех ключевых слов");
     setInputMode("delWors");
   });
 
-  bot.command("resetStat", async (ctx) => {
+  bot.chatType("private").command("reset_stat", async (ctx) => {
+    if (!isAdmin(ctx.from?.username)) {
+      await ctx.reply("Это действие доступно только админу чата");
+      return;
+    }
     await ctx.reply("Введите Y/Yes для удаления статистики");
     setInputMode("delStat");
   });
 
-  bot.callbackQuery("addWord", async (ctx) => {
-    await ctx.reply("Введите новое слово в строке ниже");
-    setInputMode("add");
+  bot.command("start", (ctx) => showStartMessages(ctx, menuKeyboard));
+
+  bot.command("help", async (ctx) => {
+    await bot.api.sendMessage(ctx.chatId, "Помощь");
+    await bot.api.sendMessage(ctx.chatId, phrases.userHelp);
+  });
+
+  bot.command("menu", async (ctx) => {
+    await ctx.reply("Меню цензор бота /help - если нужна помошь", {
+      reply_markup: isAdmin(ctx.from?.username)
+        ? menuKeyboard
+        : userMenuKeyboard,
+    });
   });
 };
