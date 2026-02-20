@@ -9,13 +9,14 @@ import { admins, setInputMode } from "./censorBot";
 import { updateAdmins } from "./changeRoleAdmin";
 import { InlineKeyboard, type Context } from "grammy";
 
-const isAdmin = (userName?: string) => {
-  admins();
-  console.log("userName ==> ", userName);
-  console.log("admins() ==> ", admins());
-  return admins()
-    .flat(1)
-    .some((value) => value === userName);
+const isAdmin = (chat: Context["chat"], userName?: string) => {
+  // admins();
+  // console.log("userName ==> ", userName);
+  // console.log("chat ==> ", chat);
+  // console.log("admins() ==> ", admins());
+  const chatInfo = admins().flat(1);
+  const isAdmin = chatInfo.some((value) => value === userName);
+  return isAdmin && chat?.type === "private";
 };
 
 const showStartMessages = async (ctx: Context, keyboard: InlineKeyboard) => {
@@ -41,7 +42,7 @@ export const useCensorCommands = () => {
   });
 
   bot.chatType("private").command("reset_all", async (ctx) => {
-    if (!isAdmin(ctx.from?.username)) {
+    if (!isAdmin(ctx.chat, ctx.from?.username)) {
       await ctx.reply("Это действие доступно только админу чата");
       return;
     }
@@ -50,7 +51,7 @@ export const useCensorCommands = () => {
   });
 
   bot.chatType("private").command("reset_words", async (ctx) => {
-    if (!isAdmin(ctx.from?.username)) {
+    if (!isAdmin(ctx.chat, ctx.from?.username)) {
       await ctx.reply("Это действие доступно только админу чата");
       return;
     }
@@ -59,7 +60,7 @@ export const useCensorCommands = () => {
   });
 
   bot.chatType("private").command("reset_stat", async (ctx) => {
-    if (!isAdmin(ctx.from?.username)) {
+    if (!isAdmin(ctx.chat, ctx.from?.username)) {
       await ctx.reply("Это действие доступно только админу чата");
       return;
     }
@@ -76,7 +77,7 @@ export const useCensorCommands = () => {
 
   bot.command("menu", async (ctx) => {
     await ctx.reply("Меню цензор бота /help - если нужна помошь", {
-      reply_markup: isAdmin(ctx.from?.username)
+      reply_markup: isAdmin(ctx.chat, ctx.from?.username)
         ? menuKeyboard
         : userMenuKeyboard,
     });

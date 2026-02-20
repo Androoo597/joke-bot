@@ -79,7 +79,13 @@ export const useMessageHandler = () => {
         break;
 
       default:
+        // для дебага регулярки
+        // console.log("proxyReg.dymanicReg ==> ", proxyReg.dymanicReg);
+        // для дебага слов в бд
+        // console.log("words ==> ", getAllWords());
         const searchRes = (message + " ").match(proxyReg.dymanicReg);
+        // для дебага результата поиска
+        // console.log("searchRes ==> ", searchRes);
         const res = searchRes?.map((item) => item.slice(0, -1).trim());
 
         if (res?.length) {

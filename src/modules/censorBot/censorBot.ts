@@ -14,22 +14,19 @@ export type Admins = (string | number | undefined)[][];
 export const [inputMode, setInputMode] = useState<string>("");
 export const [regWords, setRegWords] = useState<string[]>(getAllWords());
 
-const adminsSql = trySqlRequest({
-  method: "all",
-  sqlReq: "getAdmins",
-  tableName: "admins",
-})?.map((admin) => Object.values(admin));
-
-console.log(
-  "adminsSql ==> ",
-  adminsSql?.map((admin) => Object.values(admin)),
-);
+const adminsSql = (
+  trySqlRequest({
+    method: "all",
+    sqlReq: "getAdmins",
+    tableName: "admins",
+  }) as Record<string, string>[]
+)?.map((admin) => Object.values(admin));
 
 export const [admins, setAdmins] = useState<Admins>(adminsSql);
 
 const targetObj = {
   regWords: getAllWords(),
-  dymanicReg: myReg.censorWords(regWords()),
+  dymanicReg: myReg.makeRuEnReg(regWords()),
 };
 
 const proxyHandler = {
@@ -37,7 +34,7 @@ const proxyHandler = {
     if (target.regWords.length === regWords().length) {
       return target.dymanicReg;
     } else {
-      this._set(target, null, myReg.censorWords(regWords()));
+      this._set(target, null, myReg.makeRuEnReg(regWords()));
       return target.dymanicReg;
     }
   },
