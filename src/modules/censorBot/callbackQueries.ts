@@ -9,7 +9,7 @@ const escEnter = async (ctx: Context) => {
   setInputMode("");
 };
 
-const ownStatistic = async (ctx: CallbackQueryContext<Context>) => {
+const ownStatistic = (ctx: CallbackQueryContext<Context>) => {
   const tableResult = new InlineKeyboard();
   tableResult.text("Имя").text("Слово").text("Кол-во").row();
 
@@ -33,9 +33,38 @@ const ownStatistic = async (ctx: CallbackQueryContext<Context>) => {
 
   tableResult.text("Итог").text("Итог").text(String(counter));
 
-  await ctx.reply(`Детальная таблица для @${ctx.from.username} `, {
-    reply_markup: tableResult,
+  return tableResult;
+};
+
+const makeTableResultKeyboard = () => {
+  const tableResult = new InlineKeyboard();
+  tableResult
+    .text("Место")
+    .text("Имя")
+    .text("Кол. слов")
+    .text("Подробнее")
+    .row();
+
+  const data = trySqlRequest({
+    tableName: "data",
+    sqlReq: "getTableResult",
+    method: "all",
+  }) as Record<"userName" | "result", string>[];
+
+  data.forEach((item, index) => {
+    tableResult
+      .text(
+        `${index + 1} место ${
+          index <= 2 ? prizeSmiles[index] : prizeSmiles[3]
+        }`,
+      )
+      .text(item.userName ?? "Другие")
+      .text(item.result)
+      .text("... 📋", "ownStatistic")
+      .row();
   });
+
+  return tableResult;
 };
 
 export const useCallbackQueries = () => {
@@ -63,40 +92,21 @@ export const useCallbackQueries = () => {
 
   bot.callbackQuery("result", async (ctx) => {
     inputMode() && escEnter(ctx);
-    const tableResult = new InlineKeyboard();
-    tableResult
-      .text("Место")
-      .text("Имя")
-      .text("Кол. слов")
-      .text("Подробнее")
-      .row();
+    const tableResult = makeTableResultKeyboard();
 
-    const data = trySqlRequest({
-      tableName: "data",
-      sqlReq: "getTableResult",
-      method: "all",
-    }) as Record<"userName" | "result", string>[];
-
-    data.forEach((item, index) => {
-      tableResult
-        .text(
-          `${index + 1} место ${
-            index <= 2 ? prizeSmiles[index] : prizeSmiles[3]
-          }`,
-        )
-        .text(item.userName ?? "Другие")
-        .text(item.result)
-        .text("... 📋", "ownStatistic")
-        .row();
-    });
+    // tableResult.append(ownStatistic(ctx));
 
     await ctx.reply("Таблица результатов", {
       reply_markup: tableResult,
     });
   });
 
-  bot.callbackQuery("ownStatistic", (ctx) => {
+  bot.callbackQuery("ownStatistic", async (ctx) => {
     inputMode() && escEnter(ctx);
-    return ownStatistic(ctx);
+    const ownResult = ownStatistic(ctx);
+
+    await ctx.reply(`Детальная таблица для @${ctx.from.username} `, {
+      reply_markup: ownResult,
+    });
   });
 };

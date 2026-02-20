@@ -16,6 +16,7 @@
   "license": "ISC",
   "dependencies": {
     "@grammyjs/emoji": "^1.2.0",
+    "@grammyjs/hydrate": "^1.6.0",
     "dotenv": "^17.2.3",
     "grammy": "^1.39.2"
   },

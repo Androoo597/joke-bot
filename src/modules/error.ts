@@ -1,6 +1,7 @@
-import { Bot, Api, RawApi, Context, GrammyError, HttpError } from "grammy";
+import { GrammyError, HttpError } from "grammy";
+import { bot } from "../bot";
 
-export const initErrorObserver = (bot: Bot<Context, Api<RawApi>>) => {
+export const initErrorObserver = () => {
   //============================================================
   // Обработка ошибок
   //============================================================
