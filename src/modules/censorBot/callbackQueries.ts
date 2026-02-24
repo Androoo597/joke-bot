@@ -1,6 +1,4 @@
-import { InlineKeyboard, Context, CallbackQueryContext } from "grammy";
-import { trySqlRequest } from "../../db/methods";
-import { prizeSmiles } from "../../utils/constants";
+import { Context } from "grammy";
 import { bot } from "../../bot";
 import {
   inputMode,
@@ -8,37 +6,12 @@ import {
   regWords as getRegWords,
   tableState,
 } from "./initCensorBot";
+import { makeOwnStatisticKeyboard } from "../../utils/makeOwnKeyboard";
+import { makeTableResultKeyboard } from "../../utils/makeResultKeyboard";
 
 const escEnter = async (ctx: Context) => {
   await ctx.reply("Отмена ввода");
   setInputMode("");
-};
-
-const makeOwnStatisticKeyboard = (user?: string) => {
-  const tableResult = new InlineKeyboard();
-  tableResult.text("Имя").text("Слово").text("Кол-во").row();
-
-  const data = trySqlRequest({
-    tableName: "data",
-    sqlReq: "getOwnResult",
-    method: "all",
-    data: [user || ""],
-  }) as Record<"userName" | "word" | "count", string>[];
-
-  let counter = 0;
-
-  data.forEach((item) => {
-    counter = +item.count + counter;
-    tableResult
-      .text(item.userName || "ошибка")
-      .text(item.word || "слово удалено")
-      .text(item.count)
-      .row();
-  });
-
-  tableResult.text("Итог").text("Итог").text(String(counter));
-
-  return tableResult;
 };
 
 const detailStateToggle = (user?: string) => {
@@ -49,46 +22,6 @@ const detailStateToggle = (user?: string) => {
   } else if (user && tableState()?.[user] === "closed") {
     tableState()[user] = "opened";
   }
-};
-
-export const makeTableResultKeyboard = () => {
-  const tableResult = new InlineKeyboard();
-  tableResult
-    .text("Место")
-    .text("Имя")
-    .text("Кол. слов")
-    .text("Подробнее")
-    .row();
-
-  const data = trySqlRequest({
-    tableName: "data",
-    sqlReq: "getTableResult",
-    method: "all",
-  }) as Record<"userName" | "result", string>[];
-
-  data.forEach((item, index) => {
-    const isOpened =
-      tableState()?.[item.userName] &&
-      tableState()?.[item.userName] === "opened";
-
-    tableResult
-      .text(
-        `${index + 1} место ${
-          index <= 2 ? prizeSmiles[index] : prizeSmiles[3]
-        }`,
-      )
-      .text(item.userName ?? "Другие")
-      .text(item.result)
-      .text(isOpened ? "🔻...🔻" : "🔺...🔺", `ownStatistic:${item.userName}`);
-
-    if (isOpened) {
-      tableResult.append(makeOwnStatisticKeyboard(item.userName));
-    }
-
-    tableResult.row();
-  });
-
-  return tableResult;
 };
 
 export const useCallbackQueries = () => {
@@ -141,3 +74,4 @@ export const useCallbackQueries = () => {
     }
   });
 };
+export { makeTableResultKeyboard };

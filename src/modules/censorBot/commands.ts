@@ -6,7 +6,7 @@ import {
 } from "../../utils/constants";
 import { bot } from "../../bot";
 import { admins, setInputMode } from "./initCensorBot";
-import { updateAdmins } from "./changeRoleAdmin";
+import { updateAdmins } from ".";
 import { InlineKeyboard, type Context } from "grammy";
 
 const isAdmin = (chat: Context["chat"], userName?: string) => {

@@ -2,8 +2,8 @@ import { bot } from "../../bot";
 import * as cron from "cron";
 import { everyFriday, everyMonday } from "../../utils/constants";
 import { admins } from "./initCensorBot";
-import { makeTableResultKeyboard } from "./callbackQueries";
 import { trySqlRequest } from "../../db/methods";
+import { makeTableResultKeyboard } from "../../utils/makeResultKeyboard";
 
 const printWeekResult = (chatId: number | string) => {
   bot.api.sendMessage(chatId, "А вот и результаты чаты за неделю", {
