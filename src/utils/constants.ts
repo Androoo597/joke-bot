@@ -6,6 +6,9 @@ export enum Tables {
   "admins" = "admins",
 }
 
+const everyFriday = "59 59 17 * * 5";
+const everyMonday = "0 0 0 * * 1";
+
 const prizeSmiles = ["🥇", "🥈", "🥉", "🍻"];
 
 const RU_EN_MAP_SYMBOLS = new Map([
@@ -123,4 +126,6 @@ export {
   menuKeyboard,
   userMenuKeyboard,
   listMyComands,
+  everyMonday,
+  everyFriday,
 };

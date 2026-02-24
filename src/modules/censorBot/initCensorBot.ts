@@ -1,4 +1,3 @@
-import { myReg } from "../../utils/constants";
 import { getAllWords } from "../../utils/getAllWords";
 import { useCensorCommands } from "./commands";
 import { useCallbackQueries } from "./callbackQueries";
@@ -6,6 +5,8 @@ import { useMessageHandler } from "./messageHandler";
 import { useState } from "../reactFeatures/useState";
 import { useChengeRoleAdmin } from "./changeRoleAdmin";
 import { trySqlRequest } from "../../db/methods";
+import { useBotRunCronJobs } from "./cronTasks";
+import { myReg } from "../../utils/constants";
 export interface TargetObj {
   regWords: string[];
   dymanicReg: RegExp;
@@ -52,4 +53,5 @@ export const initCensorBot = () => {
   useCensorCommands();
   useCallbackQueries();
   useMessageHandler();
+  useBotRunCronJobs();
 };

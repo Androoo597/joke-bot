@@ -4,11 +4,17 @@ import { initErrorObserver } from "./modules/error";
 import { hydrate, HydrateFlavor } from "@grammyjs/hydrate";
 import { reactions } from "./modules/reactions";
 import { initCensorBot } from "./modules/censorBot";
+import * as cron from "cron";
+import { everyFriday } from "./utils/constants";
 
 export type MyContext = HydrateFlavor<Context>;
 
 const bot = new Bot<MyContext>(`${process.env.TG_TOKEN}`);
 bot.use(hydrate());
+
+// cron.sendAt(everyFriday).toISO();
+console.log("everyFriday==> ", cron.sendAt(everyFriday).toISO());
+// console.log("everyMonday==> ", cron.sendAt(everyMonday).toISO());
 
 initCensorBot();
 // reactions(bot);

@@ -54,7 +54,7 @@ const detailStateToggle = (user?: string) => {
   }
 };
 
-const makeTableResultKeyboard = () => {
+export const makeTableResultKeyboard = () => {
   const tableResult = new InlineKeyboard();
   tableResult
     .text("Место")
