@@ -1,6 +1,6 @@
 import { DatabaseSync } from "node:sqlite";
-import { Tables } from "../utils/constants";
-const database = new DatabaseSync("db");
+import { Tables } from "./utils";
+const database = new DatabaseSync("./data/DB_LITE");
 
 database.exec(`
   CREATE TABLE IF NOT EXISTS ${Tables.data} (

@@ -3,6 +3,7 @@ import { trySqlRequest } from "../db/methods";
 import { tableState } from "../modules/censorBot/initCensorBot";
 import { prizeSmiles } from "./constants";
 import { makeOwnStatisticKeyboard } from "./makeOwnKeyboard";
+import { SqlMethodKeys, SqlMethods, Tables } from "../db/utils";
 
 export const makeTableResultKeyboard = () => {
   const tableResult = new InlineKeyboard();
@@ -14,9 +15,9 @@ export const makeTableResultKeyboard = () => {
     .row();
 
   const data = trySqlRequest({
-    tableName: "data",
-    sqlReq: "getTableResult",
-    method: "all",
+    tableName: Tables.data,
+    sqlReq: SqlMethodKeys.getTableResult,
+    method: SqlMethods.all,
   }) as Record<"userName" | "result", string>[];
 
   data.forEach((item, index) => {

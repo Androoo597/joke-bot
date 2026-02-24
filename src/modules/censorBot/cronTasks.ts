@@ -21,7 +21,7 @@ const cleanUpWeekResults = () => {
 };
 
 export const useBotRunCronJobs = () => {
-  const chatId = admins()[0][3] || -1;
+  const chatId = admins()?.[0]?.[3] || -1;
   new cron.CronJob(everyFriday, () => printWeekResult(chatId)).start();
   new cron.CronJob(everyMonday, cleanUpWeekResults).start();
 };

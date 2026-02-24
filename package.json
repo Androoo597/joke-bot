@@ -1,5 +1,5 @@
 {
-  "name": "jockie-bot",
+  "name": "dick-bot",
   "version": "1.0.0",
   "description": "",
   "main": "dist/main.js",
@@ -12,7 +12,7 @@
     "node": ">=22.2.0"
   },
   "keywords": [],
-  "author": "",
+  "author": "Lenshmidt A.I.",
   "license": "ISC",
   "dependencies": {
     "@grammyjs/emoji": "^1.2.0",

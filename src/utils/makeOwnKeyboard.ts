@@ -1,14 +1,15 @@
 import { InlineKeyboard } from "grammy";
 import { trySqlRequest } from "../db/methods";
+import { SqlMethodKeys, SqlMethods, Tables } from "../db/utils";
 
 export const makeOwnStatisticKeyboard = (user?: string) => {
   const tableResult = new InlineKeyboard();
   tableResult.text("Имя").text("Слово").text("Кол-во").row();
 
   const data = trySqlRequest({
-    tableName: "data",
-    sqlReq: "getOwnResult",
-    method: "all",
+    tableName: Tables.data,
+    sqlReq: SqlMethodKeys.getOwnResult,
+    method: SqlMethods.all,
     data: [user || ""],
   }) as Record<"userName" | "word" | "count", string>[];
 
