@@ -1,19 +1,25 @@
 import "dotenv/config";
-import { Bot } from "grammy";
+import { Bot, Context } from "grammy";
 import { initErrorObserver } from "./modules/error";
-import { censorBot } from "./modules/censorBot";
+import { hydrate, HydrateFlavor } from "@grammyjs/hydrate";
+import { initCensorBot } from "./modules/censorBot";
 
-const bot = new Bot(`${process.env.TG_TOKEN}`);
+export type MyContext = HydrateFlavor<Context>;
 
-censorBot(bot);
-initErrorObserver(bot);
+const bot = new Bot<MyContext>(`${process.env.TG_TOKEN}`);
+bot.use(hydrate());
+
+initCensorBot();
+initErrorObserver();
 
 bot.start({
   allowed_updates: [
     "message",
     "message_reaction",
     "message_reaction_count",
-    "edited_message",
     "callback_query",
+    "chat_member",
   ],
 });
+
+export { bot };

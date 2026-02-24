@@ -17,4 +17,15 @@ database.exec(`
   ) STRICT
 `);
 
+database.exec(`
+  CREATE TABLE IF NOT EXISTS ${Tables.admins} (
+    id INTEGER PRIMARY KEY,
+    userName TEXT,
+    userID INTEGER,
+    status TEXT,
+    chatID INTEGER,
+    chatTitle TEXT
+  ) STRICT
+`);
+
 export { database };
