@@ -26,8 +26,8 @@ export const updateAdmins = async (ctx: Context) => {
     data: res?.flat(1) as (string | number)[],
     onSuccess: () => setAdmins(res),
   });
-
-  console.log("getAdmins() ==> ", getAdmins());
+  // для дебага админов
+  // console.log("getAdmins() ==> ", getAdmins());
 };
 
 export const useChengeRoleAdmin = () => {

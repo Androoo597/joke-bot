@@ -24,10 +24,6 @@ const adminsSql = (
 
 export const [admins, setAdmins] = useState<Admins>(adminsSql);
 
-export const tableState: { value: Record<string, "opened" | "closed"> } = {
-  value: {},
-};
-
 const targetObj = {
   regWords: getAllWords(),
   dymanicReg: myReg.makeRuEnReg(regWords()),

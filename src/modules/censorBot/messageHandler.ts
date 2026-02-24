@@ -1,5 +1,4 @@
 import { trySqlRequest } from "../../db/methods";
-import { myReg } from "../../utils/constants";
 import { getAllWords } from "../../utils/getAllWords";
 import {
   setInputMode,
@@ -8,6 +7,7 @@ import {
   proxyReg,
 } from "./initCensorBot";
 import { bot } from "../../bot";
+import { myReg } from "../../utils/constants";
 
 export const useMessageHandler = () => {
   bot.chatType("private").on("message:text", async (ctx) => {
@@ -94,10 +94,7 @@ export const useMessageHandler = () => {
             sqlReq: "insert",
             method: "run",
             data: res.map((word) => [ctx.from?.username || "", word]).flat(1),
-            onSuccess: () =>
-              ctx.reply(
-                `Ваши слова: "${res.toString()}" дабавлены в статистику!`,
-              ),
+            onSuccess: () => ctx.react("👀"),
           });
         }
 
