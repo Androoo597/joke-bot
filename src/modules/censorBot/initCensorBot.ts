@@ -14,6 +14,7 @@ export interface TargetObj {
 export type Admins = (string | number | undefined)[][];
 export const [inputMode, setInputMode] = useState<string>("");
 export const [regWords, setRegWords] = useState<string[]>(getAllWords());
+export const [tableState] = useState<Record<string, "opened" | "closed">>({});
 
 const adminsSql = (
   trySqlRequest({

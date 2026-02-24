@@ -6,11 +6,8 @@ import {
   inputMode,
   setInputMode,
   regWords as getRegWords,
+  tableState,
 } from "./initCensorBot";
-
-const tableState: { value: Record<string, "opened" | "closed"> } = {
-  value: {},
-};
 
 const escEnter = async (ctx: Context) => {
   await ctx.reply("Отмена ввода");
@@ -45,12 +42,12 @@ const makeOwnStatisticKeyboard = (user?: string) => {
 };
 
 const detailStateToggle = (user?: string) => {
-  if (user && !tableState.value?.[user]) {
-    tableState.value[user] = "opened";
-  } else if (user && tableState.value?.[user] === "opened") {
-    tableState.value[user] = "closed";
-  } else if (user && tableState.value?.[user] === "closed") {
-    tableState.value[user] = "opened";
+  if (user && !tableState()?.[user]) {
+    tableState()[user] = "opened";
+  } else if (user && tableState()?.[user] === "opened") {
+    tableState()[user] = "closed";
+  } else if (user && tableState()?.[user] === "closed") {
+    tableState()[user] = "opened";
   }
 };
 
@@ -71,9 +68,8 @@ export const makeTableResultKeyboard = () => {
 
   data.forEach((item, index) => {
     const isOpened =
-      tableState.value?.[item.userName] &&
-      tableState.value?.[item.userName] === "opened";
-    // console.log("isOpened ==> ", isOpened);
+      tableState()?.[item.userName] &&
+      tableState()?.[item.userName] === "opened";
 
     tableResult
       .text(
