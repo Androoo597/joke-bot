@@ -1,15 +1,10 @@
 import { InlineKeyboard } from "grammy";
 
-export enum Tables {
-  "data" = "data",
-  "words" = "words",
-  "admins" = "admins",
-}
-
 const everyFriday = "59 59 17 * * 5";
 const everyMonday = "0 0 0 * * 1";
 
 const prizeSmiles = ["🥇", "🥈", "🥉", "🍻"];
+const botFuckReaction = "👀";
 
 const RU_EN_MAP_SYMBOLS = new Map([
   ["а", "(a|а)"],
@@ -117,6 +112,26 @@ const phrases = {
       `,
 
   userHelp: `Чтобы вызвать Меню используйте команду /menu\n\nЧтобы вызвать Справку используйте команду /help\n\nКнопки:\n\nТаблица - выводит итоговую таблицу для всех участников чата\n\nМоя статистика - выводит вашу детализированную статистику по использованию ключевых слов`,
+  escEnter: "Отмена ввода",
+  addWord: "Введите новое слово в строке ниже",
+  delWord: "Введите удаляемое слово в строке ниже",
+  emptyWords: "Нет добавленных слов",
+  tableResult: "Таблица результатов",
+  detailInfo: (username?: string) => `Детальная таблица для @${username} `,
+  menu: "Главное меню комманд",
+  helpCommand: "Помощь",
+  adminOnly: "Это действие доступно только админу чата",
+  resetAll: "Введите Y/Yes для отчистки данных бота",
+  resetWords: "Введите Y/Yes для удаления всех ключевых слов",
+  resetStat: "Введите Y/Yes для удаления статистики",
+  menuIfHelp: "Меню цензор бота /help - если нужна помошь",
+  weekResult: "А вот и результаты чаты за неделю",
+  resultAddWord: (message?: string) => `Слова: "${message}" успешно добавлены`,
+  resultDelWord: (message?: string) => `Слово: "${message}" успешно удалено`,
+  resuldResetWords: "Все ключевые слова были удалены",
+  resultResetStat: "Статистика была отчищена",
+  resultResetAll: "Ваш DICK-BOT был сброшен до заводских настроек",
+  esc: "Отмена",
 };
 
 export {
@@ -128,4 +143,5 @@ export {
   listMyComands,
   everyMonday,
   everyFriday,
+  botFuckReaction,
 };

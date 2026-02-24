@@ -9,6 +9,7 @@ import {
   useChengeRoleAdmin,
   useMessageHandler,
 } from ".";
+import { SqlMethods, SqlMethodKeys, Tables } from "../../db/utils";
 export interface TargetObj {
   regWords: string[];
   dymanicReg: RegExp;
@@ -20,9 +21,9 @@ export const [tableState] = useState<Record<string, "opened" | "closed">>({});
 
 const adminsSql = (
   trySqlRequest({
-    method: "all",
-    sqlReq: "getAdmins",
-    tableName: "admins",
+    method: SqlMethods.all,
+    sqlReq: SqlMethodKeys.getAdmins,
+    tableName: Tables.admins,
   }) as Record<string, string>[]
 )?.map((admin) => Object.values(admin));
 

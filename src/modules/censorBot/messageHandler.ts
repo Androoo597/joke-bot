@@ -7,7 +7,8 @@ import {
   proxyReg,
 } from "./initCensorBot";
 import { bot } from "../../bot";
-import { myReg } from "../../utils/constants";
+import { botFuckReaction, myReg, phrases } from "../../utils/constants";
+import { Tables, SqlMethodKeys, SqlMethods } from "../../db/utils";
 
 export const useMessageHandler = () => {
   bot.chatType("private").on("message:text", async (ctx) => {
@@ -15,66 +16,74 @@ export const useMessageHandler = () => {
     switch (getInputMode()) {
       case "add":
         trySqlRequest({
-          tableName: "words",
-          sqlReq: "insertWord",
-          method: "run",
+          tableName: Tables.words,
+          sqlReq: SqlMethodKeys.insertWord,
+          method: SqlMethods.run,
           data: message.split(myReg.splitter),
         });
 
         setRegWords(getAllWords());
-        ctx.reply(`Слова: "${ctx.update.message.text}" успешно добавлены`);
+        ctx.reply(phrases.resultAddWord(ctx.update.message.text));
         break;
 
       case "del":
         const wordsToDel = message.split(myReg.splitter);
         trySqlRequest({
-          tableName: "words",
-          sqlReq: "delwords",
-          method: "run",
+          tableName: Tables.words,
+          sqlReq: SqlMethodKeys.delwords,
+          method: SqlMethods.run,
           data: wordsToDel,
         });
 
         setRegWords(getAllWords());
-        ctx.reply(`Слово: "${ctx.update.message.text}" успешно удалено`);
+        ctx.reply(phrases.resultDelWord(ctx.update.message.text));
         break;
 
       case "delWors":
         if (myReg.yesNo.test(message)) {
           trySqlRequest({
-            tableName: "words",
-            sqlReq: "delAll",
-            method: "run",
+            tableName: Tables.words,
+            sqlReq: SqlMethodKeys.delAll,
+            method: SqlMethods.run,
           });
 
           setRegWords(getAllWords());
-          await ctx.reply("Все ключевые слова были удалены");
+          await ctx.reply(phrases.resuldResetWords);
         } else {
-          await ctx.reply("Отмена");
+          await ctx.reply(phrases.esc);
         }
         break;
 
       case "delStat":
         if (myReg.yesNo.test(message)) {
-          trySqlRequest({ tableName: "data", sqlReq: "delAll", method: "run" });
-          await ctx.reply("Статистика была отчищена");
+          trySqlRequest({
+            tableName: Tables.data,
+            sqlReq: SqlMethodKeys.delAll,
+            method: SqlMethods.run,
+          });
+          await ctx.reply(phrases.resultResetStat);
         } else {
-          await ctx.reply("Отмена");
+          await ctx.reply(phrases.esc);
         }
         break;
 
       case "delAll":
         if (myReg.yesNo.test(message)) {
-          trySqlRequest({ tableName: "data", sqlReq: "delAll", method: "run" });
           trySqlRequest({
-            tableName: "words",
-            sqlReq: "delAll",
-            method: "run",
+            tableName: Tables.data,
+            sqlReq: SqlMethodKeys.delAll,
+            method: SqlMethods.run,
+          });
+          trySqlRequest({
+            tableName: Tables.words,
+            sqlReq: SqlMethodKeys.delAll,
+            method: SqlMethods.run,
           });
 
           setRegWords(getAllWords());
-          await ctx.reply("Ваш DICK-BOT был сброшен до заводских настроек");
+          await ctx.reply(phrases.resultResetAll);
         } else {
-          await ctx.reply("Отмена");
+          await ctx.reply(phrases.esc);
         }
         break;
 
@@ -90,11 +99,11 @@ export const useMessageHandler = () => {
 
         if (res?.length) {
           trySqlRequest({
-            tableName: "data",
-            sqlReq: "insert",
-            method: "run",
+            tableName: Tables.data,
+            sqlReq: SqlMethodKeys.insert,
+            method: SqlMethods.run,
             data: res.map((word) => [ctx.from?.username || "", word]).flat(1),
-            onSuccess: () => ctx.react("👀"),
+            onSuccess: () => ctx.react(botFuckReaction),
           });
         }
 
@@ -112,9 +121,9 @@ export const useMessageHandler = () => {
 
       if (res?.length) {
         trySqlRequest({
-          tableName: "data",
-          sqlReq: "insert",
-          method: "run",
+          tableName: Tables.data,
+          sqlReq: SqlMethodKeys.insert,
+          method: SqlMethods.run,
           data: res.map((word) => [ctx.from?.username || "", word]).flat(1),
           onSuccess: () =>
             ctx.reply(

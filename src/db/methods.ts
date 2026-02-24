@@ -1,33 +1,6 @@
-import { SQLInputValue } from "node:sqlite";
 import { database } from "./createDB";
-import { myReg, Tables } from "../utils/constants";
-
-interface TrySQLReq {
-  tableName: keyof typeof Tables;
-  sqlReq: keyof typeof sqlMethods;
-  method: "all" | "get" | "run" | "columns" | "iterate";
-  data?: SQLInputValue[];
-  onError?: () => void;
-  onSuccess?: () => void;
-}
-
-const sqlMethods = {
-  getAll: "SELECT * FROM tableName ORDER BY id",
-  getTableResult:
-    "SELECT userName, COUNT(userName) as result FROM tableName GROUP BY userName ORDER BY result DESC",
-  getOwnResult:
-    "SELECT userName, word, COUNT(word) as count FROM tableName WHERE userName=? GROUP BY word ORDER BY count DESC",
-  getAllWords: "SELECT word FROM tableName ORDER BY id",
-  insert: "INSERT or IGNORE INTO tableName (userName, word) VALUES (?, ?)",
-  insertWord: "INSERT or IGNORE INTO tableName (word) VALUES (?)",
-  delAll: "DELETE FROM tableName",
-  delwords: "DELETE FROM tableName WHERE word IN (?)",
-  getAdmins:
-    "SELECT userName, userID, status, chatID, chatTitle FROM tableName ORDER BY status",
-  delAdmin: "DELETE FROM tableName",
-  insertAdmins:
-    "INSERT or IGNORE INTO tableName (userName, userID, status, chatID, chatTitle) VALUES (?, ?, ?, ?, ?)",
-};
+import { myReg } from "../utils/constants";
+import { sqlMethods, TrySQLReq } from "./utils";
 
 let sql;
 

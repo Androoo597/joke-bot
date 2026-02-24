@@ -8,9 +8,10 @@ import {
 } from "./initCensorBot";
 import { makeOwnStatisticKeyboard } from "../../utils/makeOwnKeyboard";
 import { makeTableResultKeyboard } from "../../utils/makeResultKeyboard";
+import { phrases } from "../../utils/constants";
 
 const escEnter = async (ctx: Context) => {
-  await ctx.reply("Отмена ввода");
+  await ctx.reply(phrases.escEnter);
   setInputMode("");
 };
 
@@ -30,20 +31,18 @@ export const useCallbackQueries = () => {
   });
 
   bot.chatType("private").callbackQuery("addWord", async (ctx) => {
-    await ctx.reply("Введите новое слово в строке ниже");
+    await ctx.reply(phrases.addWord);
     setInputMode("add");
   });
 
   bot.chatType("private").callbackQuery("delWord", async (ctx) => {
-    await ctx.reply("Введите удаляемое слово в строке ниже");
+    await ctx.reply(phrases.delWord);
     setInputMode("del");
   });
 
   bot.chatType("private").callbackQuery("alertWords", async (ctx) => {
     const allWords = getRegWords();
-    await ctx.reply(
-      allWords.length ? allWords.join("\n") : "Нет добавленных слов",
-    );
+    await ctx.reply(allWords.length ? allWords.join("\n") : phrases.emptyWords);
     inputMode() && escEnter(ctx);
   });
 
@@ -51,7 +50,7 @@ export const useCallbackQueries = () => {
     inputMode() && escEnter(ctx);
     const tableResult = makeTableResultKeyboard();
 
-    await ctx.reply("Таблица результатов", {
+    await ctx.reply(phrases.tableResult, {
       reply_markup: tableResult,
     });
   });
@@ -63,12 +62,12 @@ export const useCallbackQueries = () => {
     detailStateToggle(user);
 
     if (user) {
-      ctx.callbackQuery.message?.editText("Таблица результатов", {
+      ctx.callbackQuery.message?.editText(phrases.tableResult, {
         reply_markup: makeTableResultKeyboard(),
       });
       ctx.answerCallbackQuery();
     } else {
-      await ctx.reply(`Детальная таблица для @${ctx.from.username} `, {
+      await ctx.reply(phrases.detailInfo(ctx.from.username), {
         reply_markup: makeOwnStatisticKeyboard(ctx.from.username),
       });
     }

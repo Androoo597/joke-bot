@@ -1,18 +1,23 @@
 import { bot } from "../../bot";
 import * as cron from "cron";
-import { everyFriday, everyMonday } from "../../utils/constants";
+import { everyFriday, everyMonday, phrases } from "../../utils/constants";
 import { admins } from "./initCensorBot";
 import { trySqlRequest } from "../../db/methods";
 import { makeTableResultKeyboard } from "../../utils/makeResultKeyboard";
+import { Tables, SqlMethodKeys, SqlMethods } from "../../db/utils";
 
 const printWeekResult = (chatId: number | string) => {
-  bot.api.sendMessage(chatId, "А вот и результаты чаты за неделю", {
+  bot.api.sendMessage(chatId, phrases.weekResult, {
     reply_markup: makeTableResultKeyboard(),
   });
 };
 
 const cleanUpWeekResults = () => {
-  trySqlRequest({ tableName: "data", sqlReq: "delAll", method: "run" });
+  trySqlRequest({
+    tableName: Tables.data,
+    sqlReq: SqlMethodKeys.delAll,
+    method: SqlMethods.run,
+  });
 };
 
 export const useBotRunCronJobs = () => {

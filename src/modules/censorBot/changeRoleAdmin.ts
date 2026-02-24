@@ -2,6 +2,7 @@ import { Context } from "grammy";
 import { trySqlRequest } from "../../db/methods";
 import { setAdmins } from "./initCensorBot";
 import { bot } from "../../bot";
+import { SqlMethods, SqlMethodKeys, Tables } from "../../db/utils";
 
 export const updateAdmins = async (ctx: Context) => {
   const admins = (await ctx.getChatAdministrators()) || [];
@@ -14,15 +15,15 @@ export const updateAdmins = async (ctx: Context) => {
   ]);
 
   trySqlRequest({
-    method: "run",
-    sqlReq: "delAdmin",
-    tableName: "admins",
+    method: SqlMethods.run,
+    sqlReq: SqlMethodKeys.delAdmin,
+    tableName: Tables.admins,
   });
 
   trySqlRequest({
-    method: "run",
-    sqlReq: "insertAdmins",
-    tableName: "admins",
+    method: SqlMethods.run,
+    sqlReq: SqlMethodKeys.insertAdmins,
+    tableName: Tables.admins,
     data: res?.flat(1) as (string | number)[],
     onSuccess: () => setAdmins(res),
   });

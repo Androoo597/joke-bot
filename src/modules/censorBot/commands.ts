@@ -23,7 +23,7 @@ const showStartMessages = async (ctx: Context, keyboard: InlineKeyboard) => {
   await bot.api.sendMessage(ctx?.chatId || -1, phrases.hello, {
     parse_mode: "HTML",
   });
-  await ctx.reply("Главное меню комманд", {
+  await ctx.reply(phrases.menu, {
     reply_markup: keyboard,
   });
 };
@@ -37,46 +37,46 @@ export const useCensorCommands = () => {
   });
 
   bot.chatType("private").command("help", async (ctx) => {
-    await bot.api.sendMessage(ctx.chatId, "Помощь");
+    await bot.api.sendMessage(ctx.chatId, phrases.helpCommand);
     await bot.api.sendMessage(ctx.chatId, phrases.help);
   });
 
   bot.chatType("private").command("reset_all", async (ctx) => {
     if (!isAdmin(ctx.chat, ctx.from?.username)) {
-      await ctx.reply("Это действие доступно только админу чата");
+      await ctx.reply(phrases.adminOnly);
       return;
     }
-    await ctx.reply("Введите Y/Yes для отчистки данных бота");
+    await ctx.reply(phrases.resetAll);
     setInputMode("delAll");
   });
 
   bot.chatType("private").command("reset_words", async (ctx) => {
     if (!isAdmin(ctx.chat, ctx.from?.username)) {
-      await ctx.reply("Это действие доступно только админу чата");
+      await ctx.reply(phrases.adminOnly);
       return;
     }
-    await ctx.reply("Введите Y/Yes для удаления всех ключевых слов");
+    await ctx.reply(phrases.resetWords);
     setInputMode("delWors");
   });
 
   bot.chatType("private").command("reset_stat", async (ctx) => {
     if (!isAdmin(ctx.chat, ctx.from?.username)) {
-      await ctx.reply("Это действие доступно только админу чата");
+      await ctx.reply(phrases.adminOnly);
       return;
     }
-    await ctx.reply("Введите Y/Yes для удаления статистики");
+    await ctx.reply(phrases.resetStat);
     setInputMode("delStat");
   });
 
   bot.command("start", (ctx) => showStartMessages(ctx, menuKeyboard));
 
   bot.command("help", async (ctx) => {
-    await bot.api.sendMessage(ctx.chatId, "Помощь");
+    await bot.api.sendMessage(ctx.chatId, phrases.helpCommand);
     await bot.api.sendMessage(ctx.chatId, phrases.userHelp);
   });
 
   bot.command("menu", async (ctx) => {
-    await ctx.reply("Меню цензор бота /help - если нужна помошь", {
+    await ctx.reply(phrases.menuIfHelp, {
       reply_markup: isAdmin(ctx.chat, ctx.from?.username)
         ? menuKeyboard
         : userMenuKeyboard,
