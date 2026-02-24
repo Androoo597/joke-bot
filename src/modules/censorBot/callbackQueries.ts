@@ -2,14 +2,19 @@ import { InlineKeyboard, Context, CallbackQueryContext } from "grammy";
 import { trySqlRequest } from "../../db/methods";
 import { prizeSmiles } from "../../utils/constants";
 import { bot } from "../../bot";
-import { inputMode, setInputMode, regWords as getRegWords } from "./censorBot";
+import {
+  inputMode,
+  setInputMode,
+  regWords as getRegWords,
+  tableState,
+} from "./initCensorBot";
 
 const escEnter = async (ctx: Context) => {
   await ctx.reply("Отмена ввода");
   setInputMode("");
 };
 
-const ownStatistic = (ctx: CallbackQueryContext<Context>) => {
+const makeOwnStatisticKeyboard = (user?: string) => {
   const tableResult = new InlineKeyboard();
   tableResult.text("Имя").text("Слово").text("Кол-во").row();
 
@@ -17,7 +22,7 @@ const ownStatistic = (ctx: CallbackQueryContext<Context>) => {
     tableName: "data",
     sqlReq: "getOwnResult",
     method: "all",
-    data: [ctx.from.username || ""],
+    data: [user || ""],
   }) as Record<"userName" | "word" | "count", string>[];
 
   let counter = 0;
@@ -36,6 +41,16 @@ const ownStatistic = (ctx: CallbackQueryContext<Context>) => {
   return tableResult;
 };
 
+const detailStateToggle = (user?: string) => {
+  if (user && !tableState.value?.[user]) {
+    tableState.value[user] = "opened";
+  } else if (user && tableState.value[user] === "opened") {
+    tableState.value[user] = "closed";
+  } else if (user && tableState.value[user] === "closed") {
+    tableState.value[user] = "opened";
+  }
+};
+
 const makeTableResultKeyboard = () => {
   const tableResult = new InlineKeyboard();
   tableResult
@@ -52,6 +67,11 @@ const makeTableResultKeyboard = () => {
   }) as Record<"userName" | "result", string>[];
 
   data.forEach((item, index) => {
+    const isOpened =
+      tableState.value?.[item.userName] &&
+      tableState.value?.[item.userName] === "opened";
+    // console.log("isOpened ==> ", isOpened);
+
     tableResult
       .text(
         `${index + 1} место ${
@@ -60,8 +80,13 @@ const makeTableResultKeyboard = () => {
       )
       .text(item.userName ?? "Другие")
       .text(item.result)
-      .text("... 📋", "ownStatistic")
-      .row();
+      .text(isOpened ? "🔻...🔻" : "🔺...🔺", `ownStatistic:${item.userName}`);
+
+    if (isOpened) {
+      tableResult.append(makeOwnStatisticKeyboard(item.userName));
+    }
+
+    tableResult.row();
   });
 
   return tableResult;
@@ -94,19 +119,26 @@ export const useCallbackQueries = () => {
     inputMode() && escEnter(ctx);
     const tableResult = makeTableResultKeyboard();
 
-    // tableResult.append(ownStatistic(ctx));
-
     await ctx.reply("Таблица результатов", {
       reply_markup: tableResult,
     });
   });
 
-  bot.callbackQuery("ownStatistic", async (ctx) => {
+  bot.callbackQuery(/ownStatistic[:]?(\w+)?/, async (ctx) => {
     inputMode() && escEnter(ctx);
-    const ownResult = ownStatistic(ctx);
 
-    await ctx.reply(`Детальная таблица для @${ctx.from.username} `, {
-      reply_markup: ownResult,
-    });
+    const user = ctx.match[1];
+    detailStateToggle(user);
+
+    if (user) {
+      ctx.callbackQuery.message?.editText("Таблица результатов", {
+        reply_markup: makeTableResultKeyboard(),
+      });
+      ctx.answerCallbackQuery();
+    } else {
+      await ctx.reply(`Детальная таблица для @${ctx.from.username} `, {
+        reply_markup: makeOwnStatisticKeyboard(ctx.from.username),
+      });
+    }
   });
 };

@@ -5,7 +5,7 @@ import {
   userMenuKeyboard,
 } from "../../utils/constants";
 import { bot } from "../../bot";
-import { admins, setInputMode } from "./censorBot";
+import { admins, setInputMode } from "./initCensorBot";
 import { updateAdmins } from "./changeRoleAdmin";
 import { InlineKeyboard, type Context } from "grammy";
 

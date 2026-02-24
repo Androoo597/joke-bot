@@ -1,6 +1,6 @@
 import { Context } from "grammy";
 import { trySqlRequest } from "../../db/methods";
-import { setAdmins, admins as getAdmins } from "./censorBot";
+import { setAdmins, admins as getAdmins } from "./initCensorBot";
 import { bot } from "../../bot";
 
 export const updateAdmins = async (ctx: Context) => {

@@ -1,1 +1,1 @@
-export { censorBot } from "./censorBot";
+export { initCensorBot } from "./initCensorBot";

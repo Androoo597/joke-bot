@@ -6,7 +6,7 @@ import {
   inputMode as getInputMode,
   setRegWords,
   proxyReg,
-} from "./censorBot";
+} from "./initCensorBot";
 import { bot } from "../../bot";
 
 export const useMessageHandler = () => {
